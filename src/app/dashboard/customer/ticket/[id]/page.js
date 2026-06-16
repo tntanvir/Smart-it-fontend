@@ -72,6 +72,7 @@ export default function TicketDetail({ params }) {
       category: ticket.category,
       priority: ticket.priority,
       budget: ticket.budget,
+      address: ticket.address || '',
     });
     setIsEditing(true);
     setSaveError('');
@@ -422,6 +423,15 @@ export default function TicketDetail({ params }) {
                     />
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label className="font-bold text-gray-700 dark:text-neutral-200">Service Address</Label>
+                  <Input 
+                    value={editData.address || ''} 
+                    onChange={(e) => setEditData({...editData, address: e.target.value})}
+                    placeholder="Full address"
+                  />
+                </div>
               </CardContent>
             </Card>
           ) : (
@@ -539,6 +549,15 @@ export default function TicketDetail({ params }) {
                 </div>
                 <span className={`font-semibold capitalize ${ticket.priority === 'high' ? 'text-red-600 dark:text-red-400' : ticket.priority === 'medium' ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'} transition-colors duration-200`}>
                   {ticket.priority}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center text-gray-500 dark:text-neutral-400">
+                  <MapPin className="w-4 h-4 mr-2" />
+                  <span className="text-sm">Address</span>
+                </div>
+                <span className="font-semibold text-gray-900 dark:text-white transition-colors duration-200 text-right max-w-[60%] line-clamp-2">
+                  {ticket.address || 'Not provided'}
                 </span>
               </div>
               <div className="flex items-center justify-between">

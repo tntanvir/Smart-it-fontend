@@ -23,6 +23,7 @@ export default function ProfileSettings() {
     name: '',
     phone: '',
     location: '',
+    nid_number: '',
     skills: '',
     experience_years: ''
   });
@@ -39,6 +40,7 @@ export default function ProfileSettings() {
           name: data.name || '',
           phone: data.phone || '',
           location: data.location || '',
+          nid_number: data.nid_number || '',
           skills: data.technician_profile?.skills || '',
           experience_years: data.technician_profile?.experience_years || ''
         });
@@ -176,6 +178,19 @@ export default function ProfileSettings() {
                   </div>
                 </div>
 
+                <div className="space-y-3">
+                  <Label htmlFor="nid_number" className="text-gray-700 dark:text-neutral-200 font-bold">NID Number <span className="text-xs font-normal text-gray-500">(Cannot be changed)</span></Label>
+                  <Input 
+                    id="nid_number" 
+                    name="nid_number"
+                    value={formData.nid_number}
+                    onChange={handleChange}
+                    placeholder="NID Number" 
+                    disabled
+                    className="bg-gray-100 dark:bg-neutral-800 text-gray-500 cursor-not-allowed"
+                  />
+                </div>
+
                 {role === 'technician' && (
                   <>
                     <div className="h-px bg-gray-100 dark:bg-neutral-800 my-6"></div>
@@ -254,6 +269,19 @@ export default function ProfileSettings() {
                 <div>
                   <p className="font-bold text-gray-900 dark:text-white text-sm transition-colors duration-200">Email Verified</p>
                   <p className="text-xs text-gray-500 dark:text-neutral-400">Your account is fully active</p>
+                </div>
+              </div>
+
+              <div className="h-px bg-gray-100 dark:bg-neutral-800 my-4"></div>
+
+              <div className="space-y-2">
+                <p className="text-sm font-semibold text-gray-900 dark:text-white">Profile Details</p>
+                <div className="text-sm text-gray-600 dark:text-neutral-400 flex flex-col gap-1">
+                  <p><span className="font-medium text-gray-800 dark:text-neutral-300">Name:</span> {profile?.name || 'N/A'}</p>
+                  <p><span className="font-medium text-gray-800 dark:text-neutral-300">Phone:</span> {profile?.phone || 'N/A'}</p>
+                  <p><span className="font-medium text-gray-800 dark:text-neutral-300">Location:</span> {profile?.location || 'N/A'}</p>
+                  <p><span className="font-medium text-gray-800 dark:text-neutral-300">NID:</span> {profile?.nid_number || 'N/A'}</p>
+                  <p><span className="font-medium text-gray-800 dark:text-neutral-300">Joined:</span> {new Date(profile?.created_at).toLocaleDateString()}</p>
                 </div>
               </div>
             </CardContent>

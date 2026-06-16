@@ -25,6 +25,7 @@ export default function AvailableTickets() {
   // Filter state
   const [category, setCategory] = useState('all');
   const [priority, setPriority] = useState('all');
+  const [address, setAddress] = useState('');
   const [minBudget, setMinBudget] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
 
@@ -34,6 +35,7 @@ export default function AvailableTickets() {
       let queryUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/technician/tickets/available/?page=${page}`;
       if (category !== 'all') queryUrl += `&category=${category}`;
       if (priority !== 'all') queryUrl += `&priority=${priority}`;
+      if (address) queryUrl += `&address=${encodeURIComponent(address)}`;
       if (minBudget) queryUrl += `&min_budget=${minBudget}`;
       if (maxBudget) queryUrl += `&max_budget=${maxBudget}`;
 
@@ -52,7 +54,7 @@ export default function AvailableTickets() {
 
   useEffect(() => {
     if (token) fetchAvailableTickets();
-  }, [token, category, priority, minBudget, maxBudget, page]);
+  }, [token, category, priority, address, minBudget, maxBudget, page]);
 
   const handleAcceptTicket = async (ticketId) => {
     setAcceptingId(ticketId);
@@ -108,6 +110,17 @@ export default function AvailableTickets() {
                 <option value="medium">Medium</option>
                 <option value="high">High</option>
               </select>
+            </div>
+
+            <div className="flex-1 space-y-1 w-full">
+              <Label className="text-xs text-gray-500 dark:text-neutral-400">Address / Location</Label>
+              <Input 
+                type="text" 
+                placeholder="Search location" 
+                value={address}
+                onChange={(e) => setAddress(e.target.value)}
+                className="bg-white dark:bg-neutral-950 border-gray-200 dark:border-neutral-800 focus-visible:ring-[#0052FF]"
+              />
             </div>
 
             <div className="flex-1 space-y-1 w-full">
@@ -184,6 +197,11 @@ export default function AvailableTickets() {
                       <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-semibold bg-gray-100 dark:bg-neutral-800 text-gray-800 dark:text-neutral-300 capitalize transition-colors duration-200">
                         {ticket.category}
                       </span>
+                      {ticket.address && (
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-semibold bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 transition-colors duration-200">
+                          <MapPin className="w-3 h-3 mr-1" /> {ticket.address}
+                        </span>
+                      )}
                       <span className={`inline-flex items-center px-2.5 py-0.5 rounded-md font-semibold capitalize ${
                         ticket.priority === 'high' ? 'bg-red-100 dark:bg-red-500/10 text-red-700 dark:text-red-400' :
                         ticket.priority === 'medium' ? 'bg-yellow-100 dark:bg-yellow-500/10 text-yellow-700 dark:text-yellow-400' :

@@ -20,6 +20,7 @@ const ticketSchema = z.object({
   description: z.string().min(10, { message: "Please provide more details." }),
   category: z.string().min(1, { message: "Please select a category." }),
   priority: z.string().min(1, { message: "Please select a priority level." }),
+  address: z.string().min(2, { message: "Address is required." }),
   budget: z.string().min(1, { message: "Please enter an estimated budget." }),
 });
 
@@ -130,6 +131,17 @@ export default function CreateTicket() {
                   {...register('description')} 
                 />
                 {errors.description && <p className="text-sm text-red-500">{errors.description.message}</p>}
+              </div>
+
+              <div className="space-y-3">
+                <Label htmlFor="address" className="text-gray-700 dark:text-neutral-200 font-bold">Service Address</Label>
+                <Input 
+                  id="address" 
+                  placeholder="Enter full address" 
+                  className={errors.address ? 'border-red-500 focus-visible:ring-red-500' : ''}
+                  {...register('address')} 
+                />
+                {errors.address && <p className="text-sm text-red-500">{errors.address.message}</p>}
               </div>
 
               <div className="space-y-3">

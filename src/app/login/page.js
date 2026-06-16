@@ -57,7 +57,11 @@ export default function LoginPage() {
         router.push('/');
       }
     } catch (err) {
-      setError(err.response?.data?.detail || err.response?.data?.error || 'Invalid email or password.');
+      if (err.response?.status === 403 && err.response?.data?.error === "Account is not active. Please verify your email.") {
+        router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
+      } else {
+        setError(err.response?.data?.detail || err.response?.data?.error || 'Invalid email or password.');
+      }
     } finally {
       setIsLoading(false);
     }

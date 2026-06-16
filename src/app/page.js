@@ -20,13 +20,20 @@ import {
   LogOut,
   LayoutDashboard,
   Menu,
-  X
+  X,
+  Star,
+  Quote
 } from "lucide-react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { useTheme } from "@/components/ThemeProvider";
 import { useAuthStore } from "@/store/useAuthStore";
 import NotificationBell from "@/components/layout/NotificationBell";
+import axios from "axios";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { Autoplay, Pagination } from 'swiper/modules';
+import 'swiper/css';
+import 'swiper/css/pagination';
 
 const services = [
   { name: "Computers & Printers", icon: Monitor },
@@ -43,11 +50,21 @@ export default function Home() {
   const [isUserDropdownOpen, setIsUserDropdownOpen] = useState(false);
   const [isMobileNavOpen, setIsMobileNavOpen] = useState(false);
   const [selectedService, setSelectedService] = useState("I need help with...");
+  const [reviews, setReviews] = useState([]);
   const { theme, toggleTheme } = useTheme();
   const { isAuthenticated, user, role, logout } = useAuthStore();
 
   React.useEffect(() => {
     setMounted(true);
+    const fetchReviews = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/tickets/top-reviews/`);
+        setReviews(response.data);
+      } catch (err) {
+        console.error("Failed to fetch top reviews", err);
+      }
+    };
+    fetchReviews();
   }, []);
 
   return (
@@ -71,6 +88,8 @@ export default function Home() {
               <a href="#services" className="text-sm font-semibold text-gray-700 dark:text-neutral-300 hover:text-[#0052FF] transition-colors">Services</a>
               <a href="#how-it-works" className="text-sm font-semibold text-gray-700 dark:text-neutral-300 hover:text-[#0052FF] transition-colors">How it Works</a>
               <a href="#benefits" className="text-sm font-semibold text-gray-700 dark:text-neutral-300 hover:text-[#0052FF] transition-colors">For Business</a>
+              <Link href="/jobs" className="text-sm font-semibold text-gray-700 dark:text-neutral-300 hover:text-[#0052FF] transition-colors">Jobs</Link>
+              <Link href="/support" className="text-sm font-semibold text-gray-700 dark:text-neutral-300 hover:text-[#0052FF] transition-colors">Support</Link>
             </nav>
 
             <div className="flex items-center space-x-1 sm:space-x-4">
@@ -159,6 +178,8 @@ export default function Home() {
                 <a href="#services" onClick={() => setIsMobileNavOpen(false)} className="text-lg font-semibold text-gray-700 dark:text-neutral-300 hover:text-[#0052FF]">Services</a>
                 <a href="#how-it-works" onClick={() => setIsMobileNavOpen(false)} className="text-lg font-semibold text-gray-700 dark:text-neutral-300 hover:text-[#0052FF]">How it Works</a>
                 <a href="#benefits" onClick={() => setIsMobileNavOpen(false)} className="text-lg font-semibold text-gray-700 dark:text-neutral-300 hover:text-[#0052FF]">For Business</a>
+                <Link href="/jobs" onClick={() => setIsMobileNavOpen(false)} className="text-lg font-semibold text-gray-700 dark:text-neutral-300 hover:text-[#0052FF]">Jobs</Link>
+                <Link href="/support" onClick={() => setIsMobileNavOpen(false)} className="text-lg font-semibold text-gray-700 dark:text-neutral-300 hover:text-[#0052FF]">Support</Link>
 
                 {!isAuthenticated ? (
                   <div className="pt-4 flex flex-col gap-4 border-t border-gray-100 dark:border-neutral-800">
@@ -361,6 +382,64 @@ export default function Home() {
             </div>
           </div>
         </section>
+
+        {/* Customer Reviews Slider */}
+        {reviews.length > 0 && (
+          <section className="py-24 bg-white dark:bg-black transition-colors duration-200">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+              <div className="text-center mb-16">
+                <h2 className="text-3xl md:text-4xl font-black mb-4 text-[#1A1F36] dark:text-white transition-colors duration-200">What Our Customers Say</h2>
+                <p className="text-lg text-gray-600 dark:text-neutral-400 max-w-2xl mx-auto transition-colors duration-200">Don't just take our word for it. See why thousands trust Smart IT.</p>
+              </div>
+
+              <Swiper
+                modules={[Autoplay, Pagination]}
+                spaceBetween={30}
+                slidesPerView={1}
+                breakpoints={{
+                  640: { slidesPerView: 1 },
+                  768: { slidesPerView: 2 },
+                  1024: { slidesPerView: 3 },
+                }}
+                autoplay={{ delay: 5000, disableOnInteraction: false }}
+                pagination={{ clickable: true, dynamicBullets: true }}
+                className="pb-16 pt-6"
+              >
+                {reviews.map((review) => (
+                  <SwiperSlide key={review.id} className="h-auto pb-4">
+                    <div className="h-full bg-white dark:bg-neutral-900 rounded-3xl p-8 border border-gray-100 dark:border-neutral-800 shadow-xl shadow-blue-900/5 hover:shadow-2xl hover:-translate-y-1 transition-all duration-300 flex flex-col relative overflow-hidden">
+                      <Quote className="absolute top-6 right-6 w-16 h-16 text-gray-50 dark:text-neutral-800/50 -rotate-12" />
+                      <div className="flex items-center gap-1 mb-6 relative z-10">
+                        {[1, 2, 3, 4, 5].map((star) => (
+                          <Star
+                            key={star}
+                            className={`w-5 h-5 ${star <= review.rating ? 'fill-yellow-400 text-yellow-400' : 'text-gray-200 dark:text-neutral-800'}`}
+                          />
+                        ))}
+                      </div>
+                      <p className="text-gray-700 dark:text-neutral-300 text-lg italic leading-relaxed mb-8 flex-1 relative z-10">
+                        "{review.comment || 'Great service! Highly recommended.'}"
+                      </p>
+                      <div className="flex items-center gap-4 mt-auto pt-6 border-t border-gray-100 dark:border-neutral-800 relative z-10">
+                        <div className="w-12 h-12 rounded-full bg-indigo-100 dark:bg-indigo-500/20 flex items-center justify-center text-indigo-700 dark:text-indigo-400 font-bold text-xl">
+                          {review.customer_info?.name?.[0] || review.customer_info?.email?.[0] || 'C'}
+                        </div>
+                        <div>
+                          <p className="font-bold text-gray-900 dark:text-white">
+                            {review.customer_info?.name || review.customer_info?.email?.split('@')[0]}
+                          </p>
+                          <p className="text-sm text-gray-500 dark:text-neutral-500">
+                            Service: <span className="capitalize">{review.category}</span>
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+                  </SwiperSlide>
+                ))}
+              </Swiper>
+            </div>
+          </section>
+        )}
 
         {/* Technician CTA */}
         <section className="py-20 bg-[#1A1F36] dark:bg-neutral-950 dark:border-y dark:border-neutral-800 text-white transition-colors duration-200">

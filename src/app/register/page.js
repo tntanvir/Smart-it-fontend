@@ -19,6 +19,7 @@ const registerSchema = z.object({
   email: z.string().email({ message: "Please enter a valid email address." }),
   phone: z.string().min(10, { message: "Enter a valid phone number." }),
   location: z.string().min(2, { message: "Location is required." }),
+  nid_number: z.string().min(1, { message: "NID Number is required." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
@@ -43,6 +44,7 @@ function RegisterForm() {
   const {
     register,
     handleSubmit,
+    getValues,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registerSchema),
@@ -60,11 +62,12 @@ function RegisterForm() {
         role: role,
         phone: data.phone,
         location: data.location,
+        nid_number: data.nid_number,
       });
       
       setSuccess(true);
       setTimeout(() => {
-        router.push('/login');
+        router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
       }, 3000);
     } catch (err) {
       setError(err.response?.data?.detail || err.response?.data?.error || 'Failed to register account.');
@@ -84,9 +87,9 @@ function RegisterForm() {
           <CheckCircle2 className="w-10 h-10 text-green-600 dark:text-green-400" />
         </motion.div>
         <h2 className="text-2xl font-bold mb-2 dark:text-white">Registration Successful!</h2>
-        <p className="text-gray-500 dark:text-neutral-400 mb-6">You will be redirected to login shortly...</p>
-        <Link href="/login">
-          <Button variant="outline">Go to Login</Button>
+        <p className="text-gray-500 dark:text-neutral-400 mb-6">Redirecting to OTP verification...</p>
+        <Link href={`/verify-otp?email=${encodeURIComponent(getValues('email') || '')}`}>
+          <Button variant="outline">Verify Now</Button>
         </Link>
       </div>
     );
@@ -152,6 +155,12 @@ function RegisterForm() {
                 <Input id="location" {...register('location')} className={errors.location ? 'border-red-500' : ''} />
                 {errors.location && <p className="text-sm text-red-500">{errors.location.message}</p>}
               </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="nid_number">NID Number</Label>
+              <Input id="nid_number" {...register('nid_number')} className={errors.nid_number ? 'border-red-500' : ''} />
+              {errors.nid_number && <p className="text-sm text-red-500">{errors.nid_number.message}</p>}
             </div>
             
             <div className="space-y-2">

@@ -53,6 +53,7 @@ export default function DashboardLayout({ children }) {
     { name: 'Create Ticket', href: '/dashboard/customer/create', icon: TicketPlus },
     { name: 'Payments', href: '/dashboard/customer/payments', icon: CreditCard },
     { name: 'Profile Settings', href: '/dashboard/profile', icon: User },
+    { name: 'Support', href: '/support', icon: MessageSquare },
   ];
 
   const technicianLinks = [
@@ -61,6 +62,7 @@ export default function DashboardLayout({ children }) {
     { name: 'My Reviews', href: '/dashboard/technician/reviews', icon: Star },
     { name: 'Earnings', href: '/dashboard/technician/earnings', icon: CreditCard },
     { name: 'Profile Settings', href: '/dashboard/profile', icon: User },
+    { name: 'Support', href: '/support', icon: MessageSquare },
   ];
 
   const links = role === 'technician' ? technicianLinks : customerLinks;

@@ -9,7 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/componen
 import { Button } from '@/components/ui/button';
 import { 
   Loader2, ArrowLeft, Tag, DollarSign, Clock, User as UserIcon, 
-  AlertCircle, CheckCircle2, Navigation, MessageSquare, Phone, Star
+  AlertCircle, CheckCircle2, Navigation, MessageSquare, Phone, Star, MapPin
 } from 'lucide-react';
 import Link from 'next/link';
 import TicketChat from '@/components/chat/TicketChat';
@@ -274,6 +274,15 @@ export default function TechnicianTicketDetail({ params }) {
                 </div>
                 <span className={`font-semibold capitalize ${ticket.priority === 'high' ? 'text-red-600 dark:text-red-400' : ticket.priority === 'medium' ? 'text-yellow-600 dark:text-yellow-400' : 'text-green-600 dark:text-green-400'} transition-colors duration-200`}>
                   {ticket.priority}
+                </span>
+              </div>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center text-gray-500 dark:text-neutral-400">
+                  <MapPin className="w-4 h-4 mr-2" />
+                  <span className="text-sm">Address</span>
+                </div>
+                <span className="font-semibold text-gray-900 dark:text-white transition-colors duration-200 text-right max-w-[60%] line-clamp-2">
+                  {ticket.address || 'Not provided'}
                 </span>
               </div>
               <div className="flex items-center justify-between">
