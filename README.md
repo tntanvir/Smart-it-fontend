@@ -1,36 +1,91 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# TechBridge Support Platform - Frontend
 
-## Getting Started
+The frontend for TechBridge, a modern, highly responsive, and interactive IT support booking platform. It provides separate portals for Customers and Technicians, allowing them to manage tickets, communicate via real-time live chat, and process payments securely.
 
-First, run the development server:
+## 🚀 Features
 
+- **Dynamic Role-Based Dashboards:** Separate, secure interfaces for Customers (creating/managing tickets, payments, reviews) and Technicians (accepting jobs, tracking earnings).
+- **Real-Time Live Chat:** Seamless real-time messaging between customers and technicians using WebSockets.
+- **Secure Authentication:** OTP-based login flow with Zustand state management handling session persistence via JWT tokens.
+- **Modern UI & Animations:** Beautiful, glassmorphic design utilizing TailwindCSS v4 and Framer Motion for highly interactive page transitions and micro-animations.
+- **Responsive Design:** Fully optimized for mobile, tablet, and desktop viewing, with mobile-first sliding sidebars and navigation menus.
+- **Dynamic Content:** Server-Side Rendering (SSR) and Client-Side rendering powered by Next.js App Router for optimal SEO and fast load times.
+- **Payment Integration:** Stripe checkout flow for seamless job payments.
+
+---
+
+## 🛠 Tech Stack
+
+- **Framework:** Next.js 16.2.9 (App Router)
+- **Library:** React 19
+- **Styling:** TailwindCSS v4
+- **Animations:** Framer Motion
+- **State Management:** Zustand
+- **Data Fetching:** Axios & React Query
+- **Form Handling:** React Hook Form & Zod
+- **Icons:** Lucide React
+- **Carousels:** Swiper
+
+---
+
+## 💻 Installation & Setup
+
+### 1. Clone the repository
+```bash
+git clone https://github.com/tntanvir/Smart-it-fontend.git
+cd Smart-it-fontend
+```
+
+### 2. Install Dependencies
+```bash
+npm install
+# or
+yarn install
+```
+
+### 3. Environment Variables
+Create a `.env.local` file in the root of the frontend directory and add your API endpoints and Stripe keys:
+```env
+NEXT_PUBLIC_API_URL=http://127.0.0.1:8001
+NEXT_PUBLIC_WS_URL=ws://127.0.0.1:8001
+NEXT_PUBLIC_STRIPE_PUBLIC_KEY=pk_test_...
+```
+
+### 4. Run the Development Server
 ```bash
 npm run dev
 # or
 yarn dev
-# or
-pnpm dev
-# or
-bun dev
 ```
-
 Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+---
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+## 📂 Project Structure
 
-## Learn More
-
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+```
+frontend/
+│
+├── public/                 # Static assets (images, logos, fonts)
+├── src/
+│   ├── app/                # Next.js App Router (Pages, Layouts, API routes)
+│   │   ├── dashboard/      # Role-based dashboard layouts
+│   │   ├── jobs/           # Public job listings
+│   │   ├── login/          # Auth routes
+│   │   ├── register/       # Registration flow
+│   │   ├── support/        # Support chat routes
+│   │   └── page.js         # Landing page
+│   │
+│   ├── components/         # Reusable React components
+│   │   ├── layout/         # Navbar, Footer, Sidebars
+│   │   ├── ui/             # Buttons, Inputs, Dialogs, Cards
+│   │   └── ThemeProvider   # Dark/Light mode toggle
+│   │
+│   ├── store/              # Zustand global state (useAuthStore)
+│   └── lib/                # Utility functions (Axios interceptors)
+│
+├── .env.local              # Environment Variables
+├── package.json            # NPM dependencies
+├── tailwind.config.js      # Tailwind configurations (if applicable)
+└── README.md               # Project documentation
+```

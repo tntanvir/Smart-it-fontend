@@ -2,8 +2,9 @@
 
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
 import { useAuthStore } from '@/store/useAuthStore';
+import { Suspense } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Loader2, ListChecks, MapPin, AlertCircle, ArrowRight, Filter, ChevronLeft, ChevronRight, ArrowLeft, Wrench } from 'lucide-react';
@@ -11,9 +12,12 @@ import Link from 'next/link';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 
-export default function PublicJobsPage() {
+function PublicJobsContent() {
   const { isAuthenticated, role, token } = useAuthStore();
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const initialCategory = searchParams.get('category') || 'all';
+  
   const [tickets, setTickets] = useState([]);
   const [loading, setLoading] = useState(true);
   const [acceptingId, setAcceptingId] = useState(null);
@@ -22,17 +26,40 @@ export default function PublicJobsPage() {
   const [hasPrev, setHasPrev] = useState(false);
   
   // Filter state
-  const [category, setCategory] = useState('all');
+  const [categoriesList, setCategoriesList] = useState([]);
+  const [category, setCategory] = useState(initialCategory);
+  const [subCategory, setSubCategory] = useState('all');
   const [priority, setPriority] = useState('all');
   const [address, setAddress] = useState('');
   const [minBudget, setMinBudget] = useState('');
   const [maxBudget, setMaxBudget] = useState('');
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/tickets/categories/`);
+        setCategoriesList(response.data);
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // When main category changes, reset sub_category
+  useEffect(() => {
+    setSubCategory('all');
+  }, [category]);
+
+  const selectedCategoryObj = categoriesList.find(c => c.id.toString() === category);
+  const subCategoriesList = selectedCategoryObj ? selectedCategoryObj.subcategories : [];
 
   const fetchAvailableTickets = async () => {
     setLoading(true);
     try {
       let queryUrl = `${process.env.NEXT_PUBLIC_API_URL}/api/technician/public-jobs/?page=${page}`;
       if (category !== 'all') queryUrl += `&category=${category}`;
+      if (subCategory !== 'all') queryUrl += `&sub_category=${subCategory}`;
       if (priority !== 'all') queryUrl += `&priority=${priority}`;
       if (address) queryUrl += `&address=${encodeURIComponent(address)}`;
       if (minBudget) queryUrl += `&min_budget=${minBudget}`;
@@ -51,7 +78,7 @@ export default function PublicJobsPage() {
 
   useEffect(() => {
     fetchAvailableTickets();
-  }, [category, priority, address, minBudget, maxBudget, page]);
+  }, [category, subCategory, priority, address, minBudget, maxBudget, page]);
 
   const handleAcceptTicket = async (ticketId) => {
     if (!isAuthenticated || role !== 'technician') {
@@ -75,22 +102,7 @@ export default function PublicJobsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-black transition-colors duration-200">
-      {/* Header */}
-      <header className="bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-neutral-800 sticky top-0 z-50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-          <Link href="/" className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-full bg-[#0052FF] flex items-center justify-center">
-              <Wrench className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-xl text-[#0052FF]">Smart IT</span>
-          </Link>
-          <Link href="/" className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-neutral-400 dark:hover:text-white transition-colors">
-            <ArrowLeft className="w-4 h-4" /> Back to Home
-          </Link>
-        </div>
-      </header>
-
-      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 pt-24 pb-12">
         <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-8 gap-4">
           <div>
             <h1 className="text-3xl font-black text-gray-900 dark:text-white transition-colors duration-200">Public Job Board</h1>
@@ -108,8 +120,8 @@ export default function PublicJobsPage() {
         {/* Filter Bar */}
         <Card className="mb-8 border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 shadow-sm">
           <CardContent className="p-5">
-            <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-end">
-              <div className="flex-1 space-y-1 w-full">
+            <div className="flex flex-col md:flex-row gap-4 items-stretch md:items-end flex-wrap">
+              <div className="flex-1 min-w-[150px] space-y-1">
                 <Label className="text-xs text-gray-500 dark:text-neutral-400">Category</Label>
                 <select 
                   value={category}
@@ -117,14 +129,28 @@ export default function PublicJobsPage() {
                   className="w-full h-10 px-3 rounded-md border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052FF]"
                 >
                   <option value="all">All Categories</option>
-                  <option value="hardware">Hardware</option>
-                  <option value="software">Software</option>
-                  <option value="network">Network & WiFi</option>
-                  <option value="other">Other</option>
+                  {categoriesList.map(cat => (
+                    <option key={cat.id} value={cat.id}>{cat.name}</option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="flex-1 min-w-[150px] space-y-1">
+                <Label className="text-xs text-gray-500 dark:text-neutral-400">Sub-Category</Label>
+                <select 
+                  value={subCategory}
+                  onChange={(e) => setSubCategory(e.target.value)}
+                  disabled={category === 'all'}
+                  className="w-full h-10 px-3 rounded-md border border-gray-200 dark:border-neutral-800 bg-white dark:bg-neutral-950 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052FF] disabled:opacity-50"
+                >
+                  <option value="all">All Sub-Categories</option>
+                  {subCategoriesList.map(sub => (
+                    <option key={sub.id} value={sub.id}>{sub.name}</option>
+                  ))}
                 </select>
               </div>
               
-              <div className="flex-1 space-y-1 w-full">
+              <div className="flex-1 min-w-[150px] space-y-1">
                 <Label className="text-xs text-gray-500 dark:text-neutral-400">Priority</Label>
                 <select 
                   value={priority}
@@ -138,8 +164,8 @@ export default function PublicJobsPage() {
                 </select>
               </div>
 
-              <div className="flex-1 space-y-1 w-full">
-                <Label className="text-xs text-gray-500 dark:text-neutral-400">Address / Location</Label>
+              <div className="flex-1 min-w-[150px] space-y-1">
+                <Label className="text-xs text-gray-500 dark:text-neutral-400">Location</Label>
                 <Input 
                   type="text" 
                   placeholder="Search location" 
@@ -149,8 +175,8 @@ export default function PublicJobsPage() {
                 />
               </div>
 
-              <div className="flex-1 space-y-1 w-full">
-                <Label className="text-xs text-gray-500 dark:text-neutral-400">Min Budget ($)</Label>
+              <div className="flex-1 min-w-[100px] space-y-1">
+                <Label className="text-xs text-gray-500 dark:text-neutral-400">Min Budget</Label>
                 <Input 
                   type="number" 
                   placeholder="0" 
@@ -160,8 +186,8 @@ export default function PublicJobsPage() {
                 />
               </div>
 
-              <div className="flex-1 space-y-1 w-full">
-                <Label className="text-xs text-gray-500 dark:text-neutral-400">Max Budget ($)</Label>
+              <div className="flex-1 min-w-[100px] space-y-1">
+                <Label className="text-xs text-gray-500 dark:text-neutral-400">Max Budget</Label>
                 <Input 
                   type="number" 
                   placeholder="500" 
@@ -206,8 +232,8 @@ export default function PublicJobsPage() {
                       <h3 className="font-bold text-lg text-gray-900 dark:text-white transition-colors duration-200">{ticket.title}</h3>
                       <p className="text-sm text-gray-600 dark:text-neutral-400 mb-3 line-clamp-2 max-w-2xl transition-colors duration-200">{ticket.description}</p>
                       <div className="flex flex-wrap items-center gap-3 text-sm">
-                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-semibold bg-gray-100 dark:bg-neutral-800 text-gray-800 dark:text-neutral-300 capitalize transition-colors duration-200">
-                          {ticket.category}
+                        <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-semibold bg-gray-100 dark:bg-neutral-800 text-gray-800 dark:text-neutral-300 transition-colors duration-200">
+                          {ticket.category_name || 'General'} {ticket.sub_category_name ? `> ${ticket.sub_category_name}` : ''}
                         </span>
                         {ticket.address && (
                           <span className="inline-flex items-center px-2.5 py-0.5 rounded-md font-semibold bg-indigo-100 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-400 transition-colors duration-200">
@@ -275,5 +301,13 @@ export default function PublicJobsPage() {
         )}
       </main>
     </div>
+  );
+}
+
+export default function PublicJobsPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen flex items-center justify-center"><Loader2 className="w-8 h-8 animate-spin text-[#0052FF]" /></div>}>
+      <PublicJobsContent />
+    </Suspense>
   );
 }

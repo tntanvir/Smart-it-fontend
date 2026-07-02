@@ -118,10 +118,8 @@ export default function PublicJobDetailPage({ params }) {
       <header className="bg-white/80 dark:bg-black/80 backdrop-blur-md border-b border-gray-200 dark:border-neutral-800 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
           <Link href="/" className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-full bg-[#0052FF] flex items-center justify-center">
-              <Wrench className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-xl text-[#0052FF]">Smart IT</span>
+            <img src="/techbridge.png" alt="TechBridge Logo" className="w-8 h-8 object-contain" />
+            <span className="font-bold text-xl text-[#0052FF]">TechBridge</span>
           </Link>
           <Link href="/jobs" className="flex items-center gap-2 text-sm font-medium text-gray-500 hover:text-gray-900 dark:text-neutral-400 dark:hover:text-white transition-colors">
             <ArrowLeft className="w-4 h-4" /> Back to Jobs

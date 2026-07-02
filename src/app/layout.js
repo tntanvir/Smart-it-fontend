@@ -1,6 +1,9 @@
 import { Inter, Outfit } from "next/font/google";
 import "./globals.css";
 import { ThemeProvider } from "@/components/ThemeProvider";
+import Navbar from "@/components/layout/Navbar";
+import Footer from "@/components/layout/Footer";
+import ScrollToTop from "@/components/ui/ScrollToTop";
 
 const inter = Inter({
   variable: "--font-inter",
@@ -13,7 +16,7 @@ const outfit = Outfit({
 });
 
 export const metadata = {
-  title: "Smart IT Support | Fast & Reliable",
+  title: "TechBridge | Your Digital IT Support Partner",
   description: "Get your IT problems solved fast with verified experts. Create tickets, chat live, and pay securely.",
 };
 
@@ -26,7 +29,10 @@ export default function RootLayout({ children }) {
     >
       <body suppressHydrationWarning className="min-h-full flex flex-col bg-white dark:bg-black text-gray-900 dark:text-white transition-colors duration-200">
         <ThemeProvider>
+          <Navbar />
           {children}
+          <Footer />
+          <ScrollToTop />
         </ThemeProvider>
       </body>
     </html>

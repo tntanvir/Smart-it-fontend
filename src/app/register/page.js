@@ -121,7 +121,7 @@ function RegisterForm() {
           </div>
           <CardTitle>Create an account</CardTitle>
           <CardDescription>
-            Join Smart IT Support as a {role} today.
+            Join TechBridge Support as a {role} today.
           </CardDescription>
         </CardHeader>
         <CardContent>

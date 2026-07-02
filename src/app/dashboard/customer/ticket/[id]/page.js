@@ -455,7 +455,7 @@ export default function TicketDetail({ params }) {
                 </div>
                 <h3 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">Job Completed & Paid!</h3>
                 <p className="text-gray-600 dark:text-green-200/80 max-w-md mx-auto mb-6">
-                  Thank you for using Smart IT. Your ticket has been successfully resolved and payment is confirmed.
+                  Thank you for using TechBridge. Your ticket has been successfully resolved and payment is confirmed.
                 </p>
 
                 {/* Review Section */}

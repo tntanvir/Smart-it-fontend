@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import axios from 'axios';
 import { useForm } from 'react-hook-form';
@@ -19,6 +19,7 @@ const ticketSchema = z.object({
   title: z.string().min(5, { message: "Title must be at least 5 characters long." }),
   description: z.string().min(10, { message: "Please provide more details." }),
   category: z.string().min(1, { message: "Please select a category." }),
+  sub_category: z.string().min(1, { message: "Please select a sub-category." }),
   priority: z.string().min(1, { message: "Please select a priority level." }),
   address: z.string().min(2, { message: "Address is required." }),
   budget: z.string().min(1, { message: "Please enter an estimated budget." }),
@@ -29,15 +30,39 @@ export default function CreateTicket() {
   const { token } = useAuthStore();
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const [categories, setCategories] = useState([]);
 
-  const { register, handleSubmit, formState: { errors } } = useForm({
+  const { register, handleSubmit, watch, formState: { errors }, setValue } = useForm({
     resolver: zodResolver(ticketSchema),
     defaultValues: {
-      category: 'hardware',
+      category: '',
+      sub_category: '',
       priority: 'medium',
       budget: '50.00'
     }
   });
+
+  const selectedCategoryId = watch('category');
+
+  useEffect(() => {
+    const fetchCategories = async () => {
+      try {
+        const response = await axios.get(`${process.env.NEXT_PUBLIC_API_URL}/api/tickets/categories/`);
+        setCategories(response.data);
+      } catch (err) {
+        console.error("Failed to fetch categories", err);
+      }
+    };
+    fetchCategories();
+  }, []);
+
+  // When main category changes, reset sub_category
+  useEffect(() => {
+    setValue('sub_category', '');
+  }, [selectedCategoryId, setValue]);
+
+  const selectedCategory = categories.find(c => c.id.toString() === selectedCategoryId);
+  const subCategories = selectedCategory ? selectedCategory.subcategories : [];
 
   const onSubmit = async (data) => {
     setIsLoading(true);
@@ -100,14 +125,33 @@ export default function CreateTicket() {
                     className="flex h-10 w-full rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 dark:text-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052FF] transition-colors duration-200"
                     {...register('category')}
                   >
-                    <option value="hardware">Hardware Repair</option>
-                    <option value="software">Software Issue</option>
-                    <option value="networking">WiFi & Network</option>
-                    <option value="general">Other / Not Sure</option>
+                    <option value="">Select Category</option>
+                    {categories.map(cat => (
+                      <option key={cat.id} value={cat.id}>{cat.name}</option>
+                    ))}
                   </select>
+                  {errors.category && <p className="text-sm text-red-500">{errors.category.message}</p>}
                 </div>
                 
                 <div className="space-y-3">
+                  <Label htmlFor="sub_category" className="text-gray-700 dark:text-neutral-200 font-bold">Sub-Category</Label>
+                  <select 
+                    id="sub_category" 
+                    className="flex h-10 w-full rounded-md border border-gray-200 dark:border-neutral-700 bg-white dark:bg-neutral-900 dark:text-white px-3 py-2 text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[#0052FF] transition-colors duration-200 disabled:opacity-50"
+                    {...register('sub_category')}
+                    disabled={!selectedCategoryId}
+                  >
+                    <option value="">Select Sub-Category</option>
+                    {subCategories.map(sub => (
+                      <option key={sub.id} value={sub.id}>{sub.name}</option>
+                    ))}
+                  </select>
+                  {errors.sub_category && <p className="text-sm text-red-500">{errors.sub_category.message}</p>}
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div className="space-y-3 md:col-span-2">
                   <Label htmlFor="priority" className="text-gray-700 dark:text-neutral-200 font-bold">Priority</Label>
                   <select 
                     id="priority" 

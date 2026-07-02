@@ -81,16 +81,14 @@ export default function DashboardLayout({ children }) {
       {/* Sidebar */}
       <aside className={`
         w-64 bg-white dark:bg-neutral-950 border-r border-gray-200 dark:border-neutral-800 
-        flex flex-col fixed h-full z-50 transition-transform duration-300 ease-in-out
+        flex flex-col fixed top-0 left-0 h-full z-50 transition-transform duration-300 ease-in-out
         ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full'} 
         md:translate-x-0
       `}>
         <div className="h-20 flex items-center px-6 border-b border-gray-100 dark:border-neutral-800">
           <Link href="/" className="flex items-center gap-2 cursor-pointer hover:opacity-80 transition-opacity">
-            <div className="w-8 h-8 rounded-full bg-[#0052FF] flex items-center justify-center">
-              <Wrench className="w-4 h-4 text-white" />
-            </div>
-            <span className="font-bold text-xl text-[#0052FF]">Smart IT</span>
+            <img src="/techbridge.png" alt="TechBridge Logo" className="w-8 h-8 object-contain" />
+            <span className="font-bold text-xl text-[#0052FF]">TechBridge</span>
           </Link>
         </div>
         
