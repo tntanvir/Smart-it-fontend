@@ -12,18 +12,18 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Monitor, ArrowLeft, Loader2, CheckCircle2 } from 'lucide-react';
+import { Monitor, ArrowLeft, Loader2, CheckCircle2, Eye, EyeOff } from 'lucide-react';
 
 const registerSchema = z.object({
   name: z.string().min(2, { message: "Name must be at least 2 characters." }),
   email: z.string().email({ message: "Please enter a valid email address." }),
-  phone: z.string().min(10, { message: "Enter a valid phone number." }),
+  phone: z.string().regex(/^[0-9]+$/, { message: "number not valid" }).min(10, { message: "number not valid" }),
   location: z.string().min(2, { message: "Location is required." }),
-  nid_number: z.string().min(1, { message: "NID Number is required." }),
+  nid_number: z.string().regex(/^[0-9]+$/, { message: "number not valid" }).min(1, { message: "NID Number is required." }),
   password: z.string().min(6, { message: "Password must be at least 6 characters." }),
   confirmPassword: z.string(),
 }).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords do not match",
+  message: "password not match",
   path: ["confirmPassword"],
 });
 
@@ -36,6 +36,8 @@ function RegisterForm() {
   const [error, setError] = useState('');
   const [success, setSuccess] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   useEffect(() => {
     setRole(defaultRole);
@@ -45,6 +47,7 @@ function RegisterForm() {
     register,
     handleSubmit,
     getValues,
+    setError: setFormError,
     formState: { errors },
   } = useForm({
     resolver: zodResolver(registerSchema),
@@ -70,7 +73,33 @@ function RegisterForm() {
         router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
       }, 3000);
     } catch (err) {
-      setError(err.response?.data?.detail || err.response?.data?.error || 'Failed to register account.');
+      const errData = err.response?.data;
+      if (errData) {
+        let hasFieldError = false;
+        if (errData.email) {
+          const msg = Array.isArray(errData.email) ? errData.email[0] : errData.email;
+          setFormError('email', { type: 'server', message: msg.toLowerCase().includes('already exists') ? 'email already exit' : msg });
+          hasFieldError = true;
+        }
+        if (errData.phone) {
+          setFormError('phone', { type: 'server', message: 'number not valid' });
+          hasFieldError = true;
+        }
+        if (errData.nid_number) {
+          const msg = Array.isArray(errData.nid_number) ? errData.nid_number[0] : errData.nid_number;
+          setFormError('nid_number', { type: 'server', message: msg });
+          hasFieldError = true;
+        }
+        
+        if (!hasFieldError) {
+          if (errData.detail) setError(errData.detail);
+          else if (errData.error) setError(errData.error);
+          else if (errData.non_field_errors) setError(errData.non_field_errors[0]);
+          else setError('Failed to register account. Please check your inputs.');
+        }
+      } else {
+        setError('Network error. Please try again later.');
+      }
     } finally {
       setIsLoading(false);
     }
@@ -147,7 +176,16 @@ function RegisterForm() {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="phone">Phone</Label>
-                <Input id="phone" {...register('phone')} className={errors.phone ? 'border-red-500' : ''} />
+                <Input 
+                  id="phone" 
+                  inputMode="numeric"
+                  {...register('phone', {
+                    onChange: (e) => {
+                      e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                    }
+                  })} 
+                  className={errors.phone ? 'border-red-500' : ''} 
+                />
                 {errors.phone && <p className="text-sm text-red-500">{errors.phone.message}</p>}
               </div>
               <div className="space-y-2">
@@ -159,19 +197,56 @@ function RegisterForm() {
 
             <div className="space-y-2">
               <Label htmlFor="nid_number">NID Number</Label>
-              <Input id="nid_number" {...register('nid_number')} className={errors.nid_number ? 'border-red-500' : ''} />
+              <Input 
+                id="nid_number" 
+                inputMode="numeric"
+                {...register('nid_number', {
+                  onChange: (e) => {
+                    e.target.value = e.target.value.replace(/[^0-9]/g, '');
+                  }
+                })} 
+                className={errors.nid_number ? 'border-red-500' : ''} 
+              />
               {errors.nid_number && <p className="text-sm text-red-500">{errors.nid_number.message}</p>}
             </div>
             
             <div className="space-y-2">
               <Label htmlFor="password">Password</Label>
-              <Input id="password" type="password" {...register('password')} className={errors.password ? 'border-red-500' : ''} />
+              <div className="relative">
+                <Input 
+                  id="password" 
+                  type={showPassword ? "text" : "password"} 
+                  {...register('password')} 
+                  className={errors.password ? 'border-red-500 pr-10' : 'pr-10'} 
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowPassword(!showPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >
+                  {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {errors.password && <p className="text-sm text-red-500">{errors.password.message}</p>}
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="confirmPassword">Confirm Password</Label>
-              <Input id="confirmPassword" type="password" {...register('confirmPassword')} className={errors.confirmPassword ? 'border-red-500' : ''} />
+              <div className="relative">
+                <Input 
+                  id="confirmPassword" 
+                  type={showConfirmPassword ? "text" : "password"} 
+                  {...register('confirmPassword')} 
+                  className={errors.confirmPassword ? 'border-red-500 pr-10' : 'pr-10'} 
+                />
+                <button
+                  type="button"
+                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300"
+                >
+                  {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                </button>
+              </div>
               {errors.confirmPassword && <p className="text-sm text-red-500">{errors.confirmPassword.message}</p>}
             </div>
 

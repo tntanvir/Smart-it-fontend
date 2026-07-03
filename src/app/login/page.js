@@ -59,8 +59,27 @@ export default function LoginPage() {
     } catch (err) {
       if (err.response?.status === 403 && err.response?.data?.error === "Account is not active. Please verify your email.") {
         router.push(`/verify-otp?email=${encodeURIComponent(data.email)}`);
+      } else if (err.response?.data) {
+        const errData = err.response.data;
+        if (errData.non_field_errors && Array.isArray(errData.non_field_errors)) {
+          setError(errData.non_field_errors[0]);
+        } else if (errData.detail) {
+          setError(errData.detail);
+        } else if (errData.error) {
+          setError(errData.error);
+        } else if (typeof errData === 'string' && errData.includes('<html')) {
+          setError('Server error occurred. Please try again later.');
+        } else {
+          // Check for field-specific errors (e.g. {"email": ["Invalid email"]})
+          const firstError = Object.values(errData).flat()[0];
+          if (typeof firstError === 'string') {
+            setError(firstError);
+          } else {
+            setError('Invalid email or password.');
+          }
+        }
       } else {
-        setError(err.response?.data?.detail || err.response?.data?.error || 'Invalid email or password.');
+        setError('Network error. Please check your connection or try again later.');
       }
     } finally {
       setIsLoading(false);
